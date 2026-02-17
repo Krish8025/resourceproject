@@ -10,8 +10,8 @@ const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Resources", href: "/resources", icon: Box },
     { name: "Allocations", href: "/allocations", icon: Briefcase },
-    { name: "Maintenance", href: "/maintenance", icon: Tool },
-    { name: "Reports", href: "/reports", icon: BarChart },
+    { name: "Maintenance", href: "/maintenance", icon: Tool, adminOnly: true },
+    { name: "Reports", href: "/reports", icon: BarChart, adminOnly: true },
     { name: "Users", href: "/users", icon: Users, adminOnly: true },
 ];
 

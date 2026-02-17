@@ -27,7 +27,7 @@ async function requireAdmin() {
 export async function getUsers() {
     try {
         await requireAdmin()
-        
+
         const users = await prisma.user.findMany({
             select: {
                 id: true,
@@ -57,7 +57,7 @@ export async function createUser(formData: FormData) {
         const password = formData.get('password') as string
 
         const validatedFields = userSchema.safeParse({ name, email, role, password })
-        
+
         if (!validatedFields.success) {
             return { success: false, error: validatedFields.error.errors[0].message }
         }
@@ -100,13 +100,13 @@ export async function updateUser(userId: number, formData: FormData) {
         const role = formData.get('role') as string
         const password = formData.get('password') as string
 
-        const validatedFields = userSchema.safeParse({ 
-            name, 
-            email, 
-            role, 
-            password: password || undefined 
+        const validatedFields = userSchema.safeParse({
+            name,
+            email,
+            role,
+            password: password || undefined
         })
-        
+
         if (!validatedFields.success) {
             return { success: false, error: validatedFields.error.errors[0].message }
         }
@@ -118,6 +118,12 @@ export async function updateUser(userId: number, formData: FormData) {
 
         if (existingUser && existingUser.id !== userId) {
             return { success: false, error: 'Email is already taken by another user' }
+        }
+
+        // Prevent changing role of an existing admin
+        const currentData = await prisma.user.findUnique({ where: { id: userId } });
+        if (currentData?.role === 'admin' && validatedFields.data.role !== 'admin') {
+            return { success: false, error: 'Cannot remove admin role from an administrator' }
         }
 
         // Prepare update data
@@ -176,6 +182,12 @@ export async function updateUserRole(userId: number, newRole: string) {
         // Prevent changing own role
         if (session.user.id === userId) {
             return { success: false, error: 'Cannot change your own role' }
+        }
+
+        // Prevent changing role of an existing admin
+        const currentData = await prisma.user.findUnique({ where: { id: userId } });
+        if (currentData?.role === 'admin' && newRole !== 'admin') {
+            return { success: false, error: 'Cannot remove admin role from an administrator' }
         }
 
         await prisma.user.update({

@@ -172,14 +172,13 @@ export function UsersClient({ users: initialUsers, currentUserId }: UsersClientP
                                         <select
                                             value={user.role}
                                             onChange={(e) => handleRoleChange(user.id, e.target.value)}
-                                            disabled={user.id === currentUserId || loading}
-                                            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize cursor-pointer border-0 ${
-                                                user.role === 'admin'
-                                                    ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400'
-                                                    : user.role === 'faculty'
+                                            disabled={user.id === currentUserId || loading || user.role === 'admin'}
+                                            className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium capitalize cursor-pointer border-0 ${user.role === 'admin'
+                                                ? 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400 opacity-100 cursor-not-allowed'
+                                                : user.role === 'faculty'
                                                     ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
                                                     : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300'
-                                            } ${user.id === currentUserId ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                } ${user.id === currentUserId ? 'opacity-50 cursor-not-allowed' : ''}`}
                                         >
                                             <option value="student">student</option>
                                             <option value="faculty">faculty</option>
@@ -367,13 +366,16 @@ export function UsersClient({ users: initialUsers, currentUserId }: UsersClientP
                                 <select
                                     name="role"
                                     required
-                                    defaultValue={selectedUser.role}
-                                    className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white"
+                                    disabled={selectedUser.role === 'admin'}
+                                    className={`w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:border-zinc-700 dark:bg-zinc-800 dark:text-white ${selectedUser.role === 'admin' ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <option value="student">Student</option>
                                     <option value="faculty">Faculty</option>
                                     <option value="admin">Admin</option>
                                 </select>
+                                {selectedUser.role === 'admin' && (
+                                    <input type="hidden" name="role" value="admin" />
+                                )}
                             </div>
 
                             <div>

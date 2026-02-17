@@ -11,7 +11,15 @@ export default async function AllocationsPage() {
     const { success, data } = await getAllBookings();
     const bookings = success && data ? data : [];
 
+    const where: any = {};
+    where.maintenance = {
+        none: {
+            status: { in: ['Scheduled', 'InProgress', 'Pending'] }
+        }
+    };
+
     const resources = await prisma.resource.findMany({
+        where,
         include: {
             type: true,
             facilities: true,

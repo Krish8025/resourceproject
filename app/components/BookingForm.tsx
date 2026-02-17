@@ -7,15 +7,21 @@ import { Loader2, X } from 'lucide-react'
 type BookingFormProps = {
     resources: any[]
     users: any[]
+    currentUser?: any
     onClose: () => void
 }
 
-export default function BookingForm({ resources, users, onClose }: BookingFormProps) {
+export default function BookingForm({ resources, users, currentUser, onClose }: BookingFormProps) {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState('')
     const [selectedResourceId, setSelectedResourceId] = useState('')
 
     const selectedResource = resources.find(r => r.id.toString() === selectedResourceId)
+
+    const isNonAdmin = currentUser?.role && currentUser.role !== 'admin';
+
+    // Set initial user ID for non-admins
+    const [selectedUserId, setSelectedUserId] = useState(isNonAdmin ? currentUser.id : '')
 
     async function handleSubmit(formData: FormData) {
         setIsLoading(true)
@@ -23,7 +29,7 @@ export default function BookingForm({ resources, users, onClose }: BookingFormPr
 
         const data = {
             resourceId: formData.get('resourceId'),
-            userId: formData.get('userId'),
+            userId: formData.get('userId') || selectedUserId, // Use state if field is hidden
             startDateTime: `${formData.get('startDate')}T${formData.get('startTime')}:00`,
             endDateTime: `${formData.get('endDate')}T${formData.get('endTime')}:00`,
         }
@@ -97,21 +103,33 @@ export default function BookingForm({ resources, users, onClose }: BookingFormPr
                         return null;
                     })()}
 
-                    <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">User</label>
-                        <select
-                            name="userId"
-                            required
-                            className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50 [&>option]:text-black"
-                        >
-                            <option value="">Select a user</option>
-                            {users.map((u) => (
-                                <option key={u.id} value={u.id}>
-                                    {u.name} ({u.role})
-                                </option>
-                            ))}
-                        </select>
-                    </div>
+                    {currentUser?.role === 'admin' ? (
+                        <div>
+                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">User</label>
+                            <select
+                                name="userId"
+                                required
+                                value={selectedUserId}
+                                onChange={(e) => setSelectedUserId(e.target.value)}
+                                className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50 [&>option]:text-black"
+                            >
+                                <option value="">Select a user</option>
+                                {users.map((u) => (
+                                    <option key={u.id} value={u.id}>
+                                        {u.name} ({u.role})
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    ) : (
+                        <div>
+                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">User</label>
+                            <div className="mt-1 block w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400">
+                                {currentUser?.name}
+                            </div>
+                            <input type="hidden" name="userId" value={currentUser?.id || ''} />
+                        </div>
+                    )}
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>

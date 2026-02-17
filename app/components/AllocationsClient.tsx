@@ -101,6 +101,7 @@ export default function AllocationsClient({ bookings, resources, users, currentU
                 <BookingForm
                     resources={resources}
                     users={users}
+                    currentUser={currentUser}
                     onClose={() => setIsFormOpen(false)}
                 />
             )}

@@ -6,6 +6,11 @@ export default async function MaintenancePage() {
     const session = await auth();
     const currentUser = session?.user;
 
+    if (currentUser?.role !== 'admin') {
+        const { redirect } = await import('next/navigation');
+        redirect('/dashboard');
+    }
+
     const { success, data } = await getAllMaintenance();
     const maintenanceRecords = success && data ? data : [];
 
