@@ -119,16 +119,49 @@ export default function ResourcesClient({ initialResources, types, buildings, us
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <span
-                                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${resource.computedStatus === "Available"
-                                                        ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-900/10 dark:text-emerald-400"
-                                                        : resource.computedStatus === "Allocated"
-                                                            ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-400"
-                                                            : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/30 dark:bg-amber-900/10 dark:text-amber-400"
-                                                    }`}
-                                            >
-                                                {resource.computedStatus}
-                                            </span>
+                                            {currentUser?.role === 'admin' ? (
+                                                <select
+                                                    value={resource.status} // Use raw status from DB
+                                                    onChange={async (e) => {
+                                                        const newStatus = e.target.value;
+                                                        // Optimistic update
+                                                        const updatedResources = resources.map((r: any) =>
+                                                            r.id === resource.id ? { ...r, status: newStatus, computedStatus: newStatus } : r
+                                                        );
+                                                        setResources(updatedResources);
+
+                                                        const { updateResourceStatus } = await import('@/app/actions/updateResourceStatus');
+                                                        const result = await updateResourceStatus(resource.id, newStatus);
+
+                                                        if (!result.success) {
+                                                            // Revert on failure
+                                                            alert('Failed to update status');
+                                                            // You might want to trigger a refresh here or revert logic
+                                                        }
+                                                    }}
+                                                    className={`rounded-full px-2.5 py-0.5 text-xs font-medium border cursor-pointer appearance-none pr-6 bg-[length:12px] bg-[right_0.5rem_center] bg-no-repeat ${resource.status === "Available"
+                                                            ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-900/10 dark:text-emerald-400"
+                                                            : resource.status === "Allocated"
+                                                                ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-400"
+                                                                : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/30 dark:bg-amber-900/10 dark:text-amber-400"
+                                                        }`}
+                                                    style={{ backgroundImage: `url('data:image/svg+xml;charset=US-ASCII,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-down"><path d="m6 9 6 6 6-6"/></svg>')` }}
+                                                >
+                                                    <option value="Available">Available</option>
+                                                    <option value="Maintenance">Maintenance</option>
+                                                </select>
+                                            ) : (
+                                                <span
+                                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium border ${resource.computedStatus === "Available"
+                                                            ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/30 dark:bg-emerald-900/10 dark:text-emerald-400"
+                                                            : resource.computedStatus === "Allocated"
+                                                                ? "border-blue-200 bg-blue-50 text-blue-700 dark:border-blue-900/30 dark:bg-blue-900/10 dark:text-blue-400"
+                                                                : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-900/30 dark:bg-amber-900/10 dark:text-amber-400"
+                                                        }`}
+                                                >
+                                                    {resource.computedStatus}
+                                                </span>
+                                            )}
                                         </td>
                                         <td className="px-6 py-4">
                                             {resource.computedAssignee !== '-' ? (

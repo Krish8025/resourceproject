@@ -49,6 +49,7 @@ model Resource {
   buildingId     Int?    @map("building_id")
   floorNumber    Int?    @map("floor_number")
   description    String? @db.Text
+  status         String  @default("Available") @db.VarChar(20)
 
   type     ResourceType @relation(fields: [resourceTypeId], references: [id], onDelete: Cascade)
   building Building?    @relation(fields: [buildingId], references: [id], onDelete: Cascade)

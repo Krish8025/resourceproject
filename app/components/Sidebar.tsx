@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { cn } from "@/app/lib/utils";
 import { LayoutDashboard, Box, Users, Settings, LogOut, Briefcase, Moon, Sun, PenTool as Tool, BarChart } from "lucide-react";
 import { handleSignOut } from "@/app/actions/signout";
@@ -16,9 +17,10 @@ const navigation = [
 ];
 
 export function Sidebar({ user }: { user?: any }) {
+    const pathname = usePathname();
 
     return (
-        <div className="flex h-screen w-64 flex-col justify-between border-r border-zinc-800 bg-zinc-900 p-4 transition-all">
+        <div className="flex h-full min-h-screen w-64 flex-col justify-between border-r border-zinc-800 bg-zinc-900 p-4 transition-all overflow-y-auto">
             <div className="space-y-6">
                 <div className="flex items-center justify-between px-2 py-4">
                     <div className="flex items-center gap-3">
@@ -38,21 +40,24 @@ export function Sidebar({ user }: { user?: any }) {
                     {navigation.map((item) => {
                         if (item.adminOnly && user?.role !== 'admin') return null;
 
+                        const isActive = pathname.startsWith(item.href);
+
                         return (
                             <Link
                                 key={item.name}
                                 href={item.href}
                                 className={cn(
                                     "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200",
-                                    // Active state
-                                    "hover:bg-zinc-800 hover:text-white",
-                                    // Text colors
-                                    "text-zinc-400"
+                                    isActive
+                                        ? "bg-zinc-800 text-white"
+                                        : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
                                 )}
                             >
                                 <div className={cn(
                                     "flex h-8 w-8 items-center justify-center rounded-lg transition-colors",
-                                    "bg-zinc-800 group-hover:bg-blue-600 group-hover:text-white border border-zinc-700"
+                                    isActive
+                                        ? "bg-blue-600 text-white border-blue-500"
+                                        : "bg-zinc-800 group-hover:bg-blue-600 group-hover:text-white border border-zinc-700"
                                 )}>
                                     <item.icon className="h-4 w-4" />
                                 </div>
