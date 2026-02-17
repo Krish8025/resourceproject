@@ -58,117 +58,127 @@ export default function ResourceForm({ resource, types, buildings, users, onClos
     }
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800">
-                <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 animate-in fade-in duration-200">
+            <div className="glass-card w-full max-w-md rounded-2xl p-6 shadow-2xl animate-in zoom-in-95 duration-200 sticky max-h-[90vh] overflow-y-auto custom-scrollbar">
+                <div className="flex items-center justify-between mb-6 sticky top-0 bg-transparent z-10">
+                    <h2 className="text-xl font-bold text-white">
                         {resource ? 'Edit Resource' : 'Add New Resource'}
                     </h2>
-                    <button onClick={onClose} className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+                    <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10 text-zinc-400 hover:text-white transition-colors">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
 
                 {error && (
-                    <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                    <div className="mb-4 rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-sm text-red-400">
                         {error}
                     </div>
                 )}
 
-                <form action={handleSubmit} className="space-y-4">
+                <form action={handleSubmit} className="space-y-5">
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Name</label>
+                        <label className="block text-sm font-medium text-zinc-400 mb-1.5">Name</label>
                         <input
                             type="text"
                             name="name"
                             defaultValue={resource?.name}
                             required
-                            className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                            className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-600"
                             placeholder="e.g. Dell XPS 15"
                         />
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Type</label>
-                        <select
-                            name="resourceTypeId"
-                            defaultValue={resource?.resourceTypeId}
-                            required
-                            className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50 [&>option]:text-black"
-                        >
-                            <option value="">Select a type</option>
-                            {types.map((type) => (
-                                <option key={type.id} value={type.id}>
-                                    {type.name}
-                                </option>
-                            ))}
-                        </select>
+                        <label className="block text-sm font-medium text-zinc-400 mb-1.5">Type</label>
+                        <div className="relative">
+                            <select
+                                name="resourceTypeId"
+                                defaultValue={resource?.resourceTypeId}
+                                required
+                                className="w-full appearance-none rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                            >
+                                <option value="" className="bg-zinc-900 text-zinc-500">Select a type</option>
+                                {types.map((type) => (
+                                    <option key={type.id} value={type.id} className="bg-zinc-900 text-white">
+                                        {type.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
+                                <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                            </div>
+                        </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Building</label>
-                            <select
-                                name="buildingId"
-                                defaultValue={resource?.buildingId}
-                                className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50 [&>option]:text-black"
-                            >
-                                <option value="">None</option>
-                                {buildings.map((b) => (
-                                    <option key={b.id} value={b.id}>
-                                        {b.name}
-                                    </option>
-                                ))}
-                            </select>
+                            <label className="block text-sm font-medium text-zinc-400 mb-1.5">Building</label>
+                            <div className="relative">
+                                <select
+                                    name="buildingId"
+                                    defaultValue={resource?.buildingId}
+                                    className="w-full appearance-none rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                                >
+                                    <option value="" className="bg-zinc-900 text-zinc-500">None</option>
+                                    {buildings.map((b) => (
+                                        <option key={b.id} value={b.id} className="bg-zinc-900 text-white">
+                                            {b.name}
+                                        </option>
+                                    ))}
+                                </select>
+                                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                                </div>
+                            </div>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Floor</label>
+                            <label className="block text-sm font-medium text-zinc-400 mb-1.5">Floor</label>
                             <input
                                 type="number"
                                 name="floorNumber"
                                 defaultValue={resource?.floorNumber}
-                                className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-600"
                             />
                         </div>
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Description</label>
+                        <label className="block text-sm font-medium text-zinc-400 mb-1.5">Description</label>
                         <textarea
                             name="description"
                             defaultValue={resource?.description}
                             rows={3}
-                            className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                            className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-2.5 text-sm text-white outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all placeholder:text-zinc-600"
                         />
                     </div>
 
                     {/* Facilities Section */}
-                    <div>
-                        <div className="flex items-center justify-between mb-2">
-                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Facilities</label>
+                    <div className="space-y-3 pt-2">
+                        <div className="flex items-center justify-between">
+                            <label className="block text-sm font-medium text-zinc-400">Facilities</label>
                             <button
                                 type="button"
                                 onClick={() => setFacilities([...facilities, { name: '', details: '' }])}
-                                className="text-xs flex items-center gap-1 text-blue-600 hover:text-blue-500 dark:text-blue-400"
+                                className="text-xs flex items-center gap-1.5 text-indigo-400 hover:text-indigo-300 transition-colors bg-indigo-500/10 px-2.5 py-1.5 rounded-lg hover:bg-indigo-500/20"
                             >
-                                <Plus className="h-3 w-3" />
+                                <Plus className="h-3.5 w-3.5" />
                                 Add Facility
                             </button>
                         </div>
                         <div className="space-y-3">
                             {facilities.map((facility, index) => (
-                                <div key={index} className="flex gap-2 items-start">
+                                <div key={index} className="flex gap-3 items-start p-3 rounded-xl bg-white/5 border border-white/5">
                                     <div className="flex-1 space-y-2">
                                         <input
                                             type="text"
-                                            placeholder="Facility Name (e.g. Projector)"
+                                            placeholder="Facility Name"
                                             value={facility.name}
                                             onChange={(e) => {
                                                 const newFacilities = [...facilities]
                                                 newFacilities[index].name = e.target.value
                                                 setFacilities(newFacilities)
                                             }}
-                                            className="block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-1.5 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                                            className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-sm text-white outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 placeholder:text-zinc-600"
                                             required
                                         />
                                         <input
@@ -180,7 +190,7 @@ export default function ResourceForm({ resource, types, buildings, users, onClos
                                                 newFacilities[index].details = e.target.value
                                                 setFacilities(newFacilities)
                                             }}
-                                            className="block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-1.5 text-xs text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                                            className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-1.5 text-xs text-zinc-300 outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 placeholder:text-zinc-600"
                                         />
                                     </div>
                                     <button
@@ -189,51 +199,58 @@ export default function ResourceForm({ resource, types, buildings, users, onClos
                                             const newFacilities = facilities.filter((_, i) => i !== index)
                                             setFacilities(newFacilities)
                                         }}
-                                        className="p-1.5 text-zinc-400 hover:text-red-500 transition-colors"
+                                        className="p-1.5 text-zinc-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors mt-1"
                                     >
                                         <Trash2 className="h-4 w-4" />
                                     </button>
                                 </div>
                             ))}
                             {facilities.length === 0 && (
-                                <p className="text-xs text-zinc-500 italic">No facilities added.</p>
+                                <div className="text-center py-4 border border-dashed border-white/10 rounded-xl">
+                                    <p className="text-xs text-zinc-500">No facilities added yet.</p>
+                                </div>
                             )}
                         </div>
                     </div>
 
                     {!resource && (
-                        <div className="rounded-xl border border-zinc-200 p-4 dark:border-zinc-800">
-                            <h3 className="mb-3 text-sm font-medium text-zinc-900 dark:text-zinc-50">Initial Allocation (Optional)</h3>
+                        <div className="rounded-xl border border-white/10 bg-white/5 p-4 mt-4">
+                            <h3 className="mb-3 text-sm font-medium text-indigo-300">Initial Allocation (Optional)</h3>
                             <div className="space-y-4">
                                 <div>
-                                    <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400">Assign to User</label>
-                                    <select
-                                        name="allocationUserId"
-                                        className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50 [&>option]:text-black"
-                                    >
-                                        <option value="">Do not allocate</option>
-                                        {users?.map((user) => (
-                                            <option key={user.id} value={user.id}>
-                                                {user.name}
-                                            </option>
-                                        ))}
-                                    </select>
+                                    <label className="block text-xs font-medium text-zinc-500 mb-1.5">Assign to User</label>
+                                    <div className="relative">
+                                        <select
+                                            name="allocationUserId"
+                                            className="w-full appearance-none rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all"
+                                        >
+                                            <option value="" className="bg-zinc-900 text-zinc-500">Do not allocate</option>
+                                            {users?.map((user) => (
+                                                <option key={user.id} value={user.id} className="bg-zinc-900 text-white">
+                                                    {user.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-zinc-500">
+                                            <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" /></svg>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400">Start Date</label>
+                                        <label className="block text-xs font-medium text-zinc-500 mb-1.5">Start Date</label>
                                         <input
                                             type="datetime-local"
                                             name="allocationStart"
-                                            className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                                            className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all [color-scheme:dark]"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-medium text-zinc-500 dark:text-zinc-400">End Date</label>
+                                        <label className="block text-xs font-medium text-zinc-500 mb-1.5">End Date</label>
                                         <input
                                             type="datetime-local"
                                             name="allocationEnd"
-                                            className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                                            className="w-full rounded-lg border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none focus:border-indigo-500/50 focus:ring-1 focus:ring-indigo-500/50 transition-all [color-scheme:dark]"
                                         />
                                     </div>
                                 </div>
@@ -241,18 +258,18 @@ export default function ResourceForm({ resource, types, buildings, users, onClos
                         </div>
                     )}
 
-                    <div className="flex items-center justify-end gap-3 pt-4">
+                    <div className="flex items-center gap-3 pt-6 border-t border-white/10">
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                            className="flex-1 rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-sm font-medium text-white hover:bg-white/10 transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
+                            className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 hover:scale-[1.02] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                             {resource ? 'Save Changes' : 'Create Resource'}

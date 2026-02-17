@@ -37,26 +37,26 @@ export default async function Dashboard() {
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">Dashboard</h1>
-                <p className="mt-2 text-zinc-500 dark:text-zinc-400">Overview of your resource management system.</p>
+                <h1 className="text-3xl font-bold tracking-tight text-white">Dashboard</h1>
+                <p className="mt-2 text-zinc-400">Overview of your resource management system.</p>
             </div>
 
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {stats.map((stat) => (
                     <div
                         key={stat.name}
-                        className="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-sm transition-all hover:shadow-md dark:bg-zinc-900 border border-zinc-100 dark:border-zinc-800"
+                        className="glass-card group relative overflow-hidden rounded-2xl p-6 transition-all hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/10"
                     >
-                        <div className={`absolute right-0 top-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-${stat.color}-500/10 blur-2xl transition-all group-hover:bg-${stat.color}-500/20`} />
+                        <div className={`absolute right-0 top-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-${stat.color}-500/20 blur-2xl transition-all group-hover:bg-${stat.color}-500/30`} />
 
                         <dt className="flex items-center gap-3">
-                            <div className={`rounded-lg bg-${stat.color}-50 p-2 dark:bg-${stat.color}-900/30`}>
-                                <stat.icon className={`h-5 w-5 text-${stat.color}-600 dark:text-${stat.color}-400`} aria-hidden="true" />
+                            <div className={`rounded-xl bg-${stat.color}-500/10 p-2 ring-1 ring-${stat.color}-500/20`}>
+                                <stat.icon className={`h-5 w-5 text-${stat.color}-400`} aria-hidden="true" />
                             </div>
-                            <p className="text-sm font-medium text-zinc-500 dark:text-zinc-400">{stat.name}</p>
+                            <p className="text-sm font-medium text-zinc-400">{stat.name}</p>
                         </dt>
                         <dd className="mt-4 flex items-baseline justify-between md:block lg:flex">
-                            <div className="flex items-baseline text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
+                            <div className="flex items-baseline text-3xl font-bold text-white">
                                 {stat.value}
                             </div>
                         </dd>
@@ -64,31 +64,37 @@ export default async function Dashboard() {
                 ))}
             </div>
 
-            <div className="grid gap-6 lg:grid-cols-2">
-                <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm">
-                    <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50 mb-4">Recent Allocations</h2>
+            <div className="grid gap-6 lg:grid-cols-3">
+                <div className="glass-card col-span-2 rounded-2xl p-6">
+                    <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                        <Briefcase className="h-5 w-5 text-indigo-400" />
+                        Recent Allocations
+                    </h2>
                     <div className="space-y-4">
                         {recentActivity && recentActivity.length > 0 ? (
                             recentActivity.map((booking: any) => (
-                                <div key={booking.id} className="flex items-center justify-between p-4 rounded-xl bg-zinc-50 dark:bg-zinc-800/50">
+                                <div key={booking.id} className="group flex items-center justify-between rounded-xl bg-white/5 p-4 transition-colors hover:bg-white/10">
                                     <div className="flex items-center gap-4">
-                                        <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 font-bold">
+                                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-violet-600 text-sm font-bold text-white shadow-lg shadow-indigo-500/20">
                                             {booking.user?.name?.[0] || 'U'}
                                         </div>
                                         <div>
-                                            <p className="font-medium text-zinc-900 dark:text-zinc-50">{booking.resource?.name}</p>
-                                            <p className="text-sm text-zinc-500 dark:text-zinc-400">Reserved by {booking.user?.name}</p>
+                                            <p className="font-medium text-white">{booking.resource?.name}</p>
+                                            <p className="text-sm text-zinc-400">Reserved by {booking.user?.name}</p>
                                         </div>
                                     </div>
                                     <div className="text-right">
-                                        <div className="flex items-center gap-1 text-sm text-zinc-500 dark:text-zinc-400">
+                                        <div className="flex items-center justify-end gap-1.5 text-xs text-zinc-500 mb-1.5">
                                             <Calendar className="h-3 w-3" />
                                             {new Date(booking.startDateTime).toLocaleDateString()}
                                         </div>
-                                        <span className={`text-xs px-2 py-0.5 rounded-full ${booking.status === 'Approved' ? 'bg-green-100 text-green-700' :
-                                                booking.status === 'Pending' ? 'bg-yellow-100 text-yellow-700' :
-                                                    'bg-red-100 text-red-700'
+                                        <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${booking.status === 'Approved' ? 'bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20' :
+                                            booking.status === 'Pending' ? 'bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20' :
+                                                'bg-red-500/10 text-red-400 ring-1 ring-red-500/20'
                                             }`}>
+                                            <div className={`h-1.5 w-1.5 rounded-full ${booking.status === 'Approved' ? 'bg-emerald-400' :
+                                                booking.status === 'Pending' ? 'bg-amber-400' : 'bg-red-400'
+                                                } shadow-[0_0_8px_currentColor]`} />
                                             {booking.status}
                                         </span>
                                     </div>
@@ -100,16 +106,29 @@ export default async function Dashboard() {
                     </div>
                 </div>
 
-                <div className="rounded-2xl border border-zinc-200 bg-white p-6 dark:border-zinc-800 dark:bg-zinc-900 shadow-sm">
-                    <h2 className="text-lg font-medium text-zinc-900 dark:text-zinc-50 mb-4">Quick Actions</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        <a href="/allocations" className="flex flex-col items-center justify-center p-6 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                            <Calendar className="h-8 w-8 text-blue-500 mb-2" />
-                            <span className="font-medium text-zinc-900 dark:text-zinc-50">New Booking</span>
+                <div className="glass-card rounded-2xl p-6">
+                    <h2 className="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                        <Users className="h-5 w-5 text-violet-400" />
+                        Quick Actions
+                    </h2>
+                    <div className="grid gap-4">
+                        <a href="/allocations" className="group flex items-center gap-4 rounded-xl bg-white/5 p-4 transition-all hover:bg-white/10 hover:shadow-lg hover:shadow-indigo-500/10 border border-white/5 hover:border-indigo-500/30">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-500/10 text-indigo-400 ring-1 ring-indigo-500/20 transition-all group-hover:bg-indigo-500 group-hover:text-white group-hover:shadow-lg group-hover:shadow-indigo-500/30">
+                                <Calendar className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <span className="block font-medium text-white group-hover:text-indigo-300 transition-colors">New Booking</span>
+                                <span className="text-xs text-zinc-500">Schedule a resource</span>
+                            </div>
                         </a>
-                        <a href="/resources" className="flex flex-col items-center justify-center p-6 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors">
-                            <Box className="h-8 w-8 text-purple-500 mb-2" />
-                            <span className="font-medium text-zinc-900 dark:text-zinc-50">Add Resource</span>
+                        <a href="/resources" className="group flex items-center gap-4 rounded-xl bg-white/5 p-4 transition-all hover:bg-white/10 hover:shadow-lg hover:shadow-violet-500/10 border border-white/5 hover:border-violet-500/30">
+                            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-violet-500/10 text-violet-400 ring-1 ring-violet-500/20 transition-all group-hover:bg-violet-500 group-hover:text-white group-hover:shadow-lg group-hover:shadow-violet-500/30">
+                                <Box className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <span className="block font-medium text-white group-hover:text-violet-300 transition-colors">Add Resource</span>
+                                <span className="text-xs text-zinc-500">Register new equipment</span>
+                            </div>
                         </a>
                     </div>
                 </div>
