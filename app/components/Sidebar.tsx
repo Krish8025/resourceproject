@@ -1,44 +1,53 @@
-"use client";
+'use client'
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/app/lib/utils";
-import { LayoutDashboard, Box, Users, Settings, LogOut, Briefcase, Moon, Sun, PenTool as Tool, BarChart } from "lucide-react";
-import { handleSignOut } from "@/app/actions/signout";
-
+import { signOut } from "next-auth/react";
+import {
+    LayoutDashboard,
+    Box,
+    Briefcase,
+    Wrench,
+    BarChart,
+    Users,
+    LogOut,
+    Sun,
+    Moon,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useTheme } from "./ThemeProvider";
 
 const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
     { name: "Resources", href: "/resources", icon: Box },
     { name: "Allocations", href: "/allocations", icon: Briefcase },
-    { name: "Maintenance", href: "/maintenance", icon: Tool, adminOnly: true },
+    { name: "Maintenance", href: "/maintenance", icon: Wrench, adminOnly: true },
     { name: "Reports", href: "/reports", icon: BarChart, adminOnly: true },
     { name: "Users", href: "/users", icon: Users, adminOnly: true },
 ];
 
 export function Sidebar({ user }: { user?: any }) {
     const pathname = usePathname();
+    const { theme, toggleTheme } = useTheme();
 
     return (
-        <aside className="relative flex h-full w-72 flex-col overflow-y-auto border-r border-white/5 bg-zinc-900/50 backdrop-blur-xl transition-all">
+        <aside className="relative flex h-full w-72 flex-col overflow-y-auto border-r border-border bg-[var(--sidebar-bg)] transition-all">
             {/* Logo Section */}
             <div className="flex h-20 items-center gap-3 px-6">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-600 shadow-lg shadow-indigo-500/20">
-                    <span className="text-lg font-bold text-white">R</span>
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1d9bf0] shadow-lg shadow-[#1d9bf0]/20">
+                    <Box className="h-5 w-5 text-white" />
                 </div>
-                <div className="flex flex-col">
-                    <span className="text-base font-bold tracking-tight text-white">ResourceMgr</span>
-                    <span className="text-xs font-medium text-zinc-500">Workspace</span>
+                <div>
+                    <h1 className="text-lg font-bold text-foreground tracking-tight">ResourceMgr</h1>
+                    <p className="text-xs text-muted-foreground">Management System</p>
                 </div>
             </div>
 
             {/* Navigation */}
             <nav className="flex-1 space-y-1 px-4 py-4">
                 {navigation.map((item) => {
-                    if (item.adminOnly && user?.role !== 'admin') return null;
-
-                    const isActive = pathname.startsWith(item.href);
-
+                    if (item.adminOnly && user?.role !== "admin") return null;
+                    const isActive = pathname === item.href;
                     return (
                         <Link
                             key={item.name}
@@ -46,42 +55,61 @@ export function Sidebar({ user }: { user?: any }) {
                             className={cn(
                                 "group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all duration-200",
                                 isActive
-                                    ? "bg-white/10 text-white shadow-inner"
-                                    : "text-zinc-400 hover:bg-white/5 hover:text-white"
+                                    ? "bg-[var(--sidebar-active)] text-[#1d9bf0] shadow-sm"
+                                    : "text-muted-foreground hover:bg-[var(--sidebar-hover)] hover:text-foreground"
                             )}
                         >
-                            <item.icon className={cn(
-                                "h-5 w-5 transition-colors",
-                                isActive ? "text-indigo-400" : "text-zinc-500 group-hover:text-indigo-400"
-                            )} />
+                            <item.icon
+                                className={cn(
+                                    "h-5 w-5 transition-colors",
+                                    isActive ? "text-[#1d9bf0]" : "text-muted-foreground group-hover:text-foreground"
+                                )}
+                            />
                             {item.name}
                             {isActive && (
-                                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
+                                <div className="ml-auto h-1.5 w-1.5 rounded-full bg-[#1d9bf0]" />
                             )}
                         </Link>
                     );
                 })}
             </nav>
 
-            {/* User Profile */}
-            <div className="border-t border-white/5 p-4">
-                <div className="group relative overflow-hidden rounded-2xl bg-white/5 p-4 transition-all hover:bg-white/10">
-                    <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-zinc-700 to-zinc-600 text-sm font-bold text-white shadow-inner">
-                            {user?.name?.[0]?.toUpperCase() || 'U'}
-                        </div>
-                        <div className="flex-1 overflow-hidden">
-                            <p className="truncate text-sm font-medium text-white">{user?.name}</p>
-                            <p className="truncate text-xs text-zinc-500 capitalize">{user?.role}</p>
-                        </div>
-                    </div>
+            {/* Theme Toggle */}
+            <div className="px-4 py-2">
+                <button
+                    onClick={toggleTheme}
+                    className="flex w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-muted-foreground transition-all duration-200 hover:bg-[var(--sidebar-hover)] hover:text-foreground"
+                >
+                    {theme === 'dark' ? (
+                        <Sun className="h-5 w-5" />
+                    ) : (
+                        <Moon className="h-5 w-5" />
+                    )}
+                    {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+                </button>
+            </div>
 
-                    <form action={handleSignOut} className="mt-4">
-                        <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-500/10 py-2 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/20 hover:text-red-300">
-                            <LogOut className="h-3.5 w-3.5" />
-                            Sign Out
-                        </button>
-                    </form>
+            {/* User Profile */}
+            <div className="border-t border-border p-4">
+                <div className="flex items-center gap-3 rounded-xl p-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-full bg-[#1d9bf0] text-white font-bold text-sm shadow-lg shadow-[#1d9bf0]/20">
+                        {user?.name?.[0]?.toUpperCase() || "U"}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-foreground truncate">
+                            {user?.name || "User"}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                            {user?.role || "member"}
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => signOut({ callbackUrl: "/login" })}
+                        className="rounded-lg p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                        title="Sign out"
+                    >
+                        <LogOut className="h-4 w-4" />
+                    </button>
                 </div>
             </div>
         </aside>

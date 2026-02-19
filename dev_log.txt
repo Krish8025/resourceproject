@@ -1,0 +1,17 @@
+﻿node.exe : ΓÜá Port 3000 is in use by process 21908, using available port 3001 instead.
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Program Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo              : NotSpe    cified: (ΓÜá Por    t 3000 i...t 300    1 instead.:Strin    g) [], RemoteExc    eption
+    + FullyQualified    ErrorId : Native    CommandError
+ 
+Γû▓ Next.js 16.1.1 (Turbopack)
+- Local:         http://localhost:3001
+- Network:       http://10.20.72.90:3001
+- Environments: .env
+
+Γ£ô Starting...
+Γ¿» Unable to acquire lock at E:\Sem 6\AWT\resourceproject\.next\dev\lock, is another instance of next dev running?
+  Suggestion: If you intended to restart next dev, terminate the other process, and then try again.
+[?25h
+

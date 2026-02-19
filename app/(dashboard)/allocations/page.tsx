@@ -11,10 +11,12 @@ export default async function AllocationsPage() {
     const { success, data } = await getAllBookings();
     const bookings = success && data ? data : [];
 
-    const where: any = {};
-    where.maintenance = {
-        none: {
-            status: { in: ['Scheduled', 'InProgress', 'Pending'] }
+    const where: any = {
+        status: { notIn: ['Maintenance', 'Unavailable'] },
+        maintenance: {
+            none: {
+                status: { in: ['Scheduled', 'InProgress', 'Pending'] }
+            }
         }
     };
 

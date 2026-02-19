@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma'
 
 export async function getDashboardStats() {
     try {
-        const [totalResources, totalUsers, maintenanceCount, activeAllocations] = await Promise.all([
+        const [totalResources, totalUsers, maintenanceCount, activeAllocations, bookingsByStatus, resourcesByType, maintenanceByStatus] = await Promise.all([
             prisma.resource.count(),
             prisma.user.count(),
             prisma.maintenance.count({
@@ -24,8 +24,42 @@ export async function getDashboardStats() {
                         lte: new Date()
                     }
                 }
+            }),
+            prisma.booking.groupBy({
+                by: ['status'],
+                _count: { id: true }
+            }),
+            prisma.resource.groupBy({
+                by: ['resourceTypeId'],
+                _count: { id: true }
+            }),
+            prisma.maintenance.groupBy({
+                by: ['status'],
+                _count: { id: true }
             })
         ])
+
+        // Enrich resource types with names
+        const typeIds = resourcesByType.map(r => r.resourceTypeId)
+        const types = typeIds.length > 0 ? await prisma.resourceType.findMany({
+            where: { id: { in: typeIds } },
+            select: { id: true, name: true }
+        }) : []
+
+        const resourceTypeData = resourcesByType.map(r => ({
+            name: types.find(t => t.id === r.resourceTypeId)?.name || 'Unknown',
+            value: r._count.id
+        }))
+
+        const bookingStatusData = bookingsByStatus.map(b => ({
+            name: b.status,
+            value: b._count.id
+        }))
+
+        const maintenanceStatusData = maintenanceByStatus.map(m => ({
+            name: m.status,
+            value: m._count.id
+        }))
 
         return {
             success: true,
@@ -33,7 +67,10 @@ export async function getDashboardStats() {
                 totalResources,
                 totalUsers,
                 maintenanceCount,
-                activeAllocations
+                activeAllocations,
+                bookingStatusData,
+                resourceTypeData,
+                maintenanceStatusData
             }
         }
     } catch (error) {

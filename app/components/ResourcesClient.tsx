@@ -1,46 +1,94 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Search, Filter, Trash2, Pencil, Eye } from 'lucide-react'
+import { Search, Eye, Pencil, Trash2, Plus, ChevronDown, ChevronUp, ArrowUpDown } from 'lucide-react'
+import { deleteResource } from '../actions/resources'
+import { updateResourceStatus } from '../actions/updateResourceStatus'
 import ResourceForm from './ResourceForm'
 import ResourceDetailsModal from './ResourceDetailsModal'
-import { deleteResource } from '../actions/resources'
-import { getResourceDetails } from '../actions/resource-details'
+
+const RESOURCE_STATUSES = ['Available', 'Allocated', 'Maintenance', 'Unavailable']
 
 export default function ResourcesClient({ initialResources, types, buildings, users, currentUser }: { initialResources: any[], types: any[], buildings: any[], users: any[], currentUser?: any }) {
     const [resources, setResources] = useState(initialResources)
-    const [isFormOpen, setIsFormOpen] = useState(false)
-    const [editingResource, setEditingResource] = useState<any>(null)
-    const [viewingResource, setViewingResource] = useState<any>(null)
     const [searchQuery, setSearchQuery] = useState('')
+    const [sortField, setSortField] = useState('name')
+    const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+    const [showForm, setShowForm] = useState(false)
+    const [editResource, setEditResource] = useState<any>(null)
+    const [viewResource, setViewResource] = useState<any>(null)
+    const [updatingStatusId, setUpdatingStatusId] = useState<number | null>(null)
 
-    // Client-side filtering
-    const filteredResources = resources.filter(r =>
-        r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        r.type.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    const isAdmin = currentUser?.role === 'admin'
 
-    const handleDelete = async (id: number) => {
-        if (confirm('Are you sure you want to delete this resource?')) {
-            await deleteResource(id)
-            setResources(resources.filter(r => r.id !== id))
+    const filteredResources = resources
+        .filter(resource =>
+            resource.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            resource.type?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            resource.building?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+        )
+        .sort((a, b) => {
+            let aVal = '', bVal = ''
+            if (sortField === 'name') { aVal = a.name; bVal = b.name }
+            else if (sortField === 'type') { aVal = a.type?.name || ''; bVal = b.type?.name || '' }
+            else if (sortField === 'building') { aVal = a.building?.name || ''; bVal = b.building?.name || '' }
+            else if (sortField === 'status') { aVal = a.computedStatus || a.status || ''; bVal = b.computedStatus || b.status || '' }
+            return sortDirection === 'asc' ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal)
+        })
+
+    const handleSort = (field: string) => {
+        if (sortField === field) {
+            setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+        } else {
+            setSortField(field)
+            setSortDirection('asc')
         }
     }
 
-    const handleEdit = (resource: any) => {
-        setEditingResource(resource)
-        setIsFormOpen(true)
+    const handleDelete = async (id: number) => {
+        if (confirm('Are you sure you want to delete this resource?')) {
+            const result = await deleteResource(id)
+            if (result.success) {
+                setResources(resources.filter(r => r.id !== id))
+            }
+        }
     }
 
-    const handleAddNew = () => {
-        setEditingResource(null)
-        setIsFormOpen(true)
-    }
-
-    const handleViewDetails = async (id: number) => {
-        const result = await getResourceDetails(id)
+    const handleStatusChange = async (resourceId: number, newStatus: string) => {
+        setUpdatingStatusId(resourceId)
+        const result = await updateResourceStatus(resourceId, newStatus)
         if (result.success) {
-            setViewingResource(result.data)
+            setResources(prev => prev.map(r =>
+                r.id === resourceId ? { ...r, status: newStatus, computedStatus: newStatus } : r
+            ))
+        }
+        setUpdatingStatusId(null)
+    }
+
+    const SortIcon = ({ field }: { field: string }) => {
+        if (sortField !== field) return <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />
+        return sortDirection === 'asc' ? <ChevronUp className="h-3.5 w-3.5" /> : <ChevronDown className="h-3.5 w-3.5" />
+    }
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'Available': return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20'
+            case 'Allocated':
+            case 'In Use': return 'bg-blue-500/10 text-blue-600 dark:text-blue-400 ring-1 ring-blue-500/20'
+            case 'Maintenance': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20'
+            case 'Unavailable': return 'bg-red-500/10 text-red-600 dark:text-red-400 ring-1 ring-red-500/20'
+            default: return 'bg-[var(--badge-bg)] text-muted-foreground ring-1 ring-border'
+        }
+    }
+
+    const getDropdownBorderColor = (status: string) => {
+        switch (status) {
+            case 'Available': return 'border-emerald-500/30 focus:ring-emerald-500/30'
+            case 'Allocated':
+            case 'In Use': return 'border-blue-500/30 focus:ring-blue-500/30'
+            case 'Maintenance': return 'border-amber-500/30 focus:ring-amber-500/30'
+            case 'Unavailable': return 'border-red-500/30 focus:ring-red-500/30'
+            default: return 'border-border focus:ring-primary/30'
         }
     }
 
@@ -48,13 +96,13 @@ export default function ResourcesClient({ initialResources, types, buildings, us
         <div className="space-y-8">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white">Resources</h1>
-                    <p className="mt-2 text-zinc-400">Manage your inventory and assets.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Resources</h1>
+                    <p className="mt-2 text-muted-foreground">Manage equipment, rooms, and facilities.</p>
                 </div>
-                {currentUser?.role === 'admin' && (
+                {isAdmin && (
                     <button
-                        onClick={handleAddNew}
-                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-500 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-indigo-500/20 transition-all hover:scale-105 hover:shadow-indigo-500/30"
+                        onClick={() => { setEditResource(null); setShowForm(true) }}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1d9bf0] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#1d9bf0]/20 transition-all hover:scale-105 hover:shadow-[#1d9bf0]/30 hover:bg-[#1a8cd8]"
                     >
                         <Plus className="h-4 w-4" />
                         Add Resource
@@ -62,183 +110,124 @@ export default function ResourcesClient({ initialResources, types, buildings, us
                 )}
             </div>
 
-            <div className="flex items-center gap-4 rounded-xl border border-white/5 bg-white/5 p-1 glass backdrop-blur-md">
+            <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-1">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                     <input
                         type="text"
                         placeholder="Search resources..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="w-full rounded-lg border-0 bg-transparent py-2.5 pl-10 pr-4 text-sm text-white placeholder:text-zinc-500 focus:ring-0 sm:leading-6"
+                        className="w-full rounded-lg border-0 bg-transparent py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:ring-0 sm:leading-6"
                     />
                 </div>
-                <div className="h-6 w-px bg-white/10" />
-                <button className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors">
-                    <Filter className="h-4 w-4" />
-                    Filter
-                </button>
             </div>
 
             <div className="glass-card overflow-hidden rounded-2xl">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-zinc-400">
-                        <thead className="bg-white/5 uppercase tracking-wider text-xs font-medium text-zinc-500">
+                    <table className="w-full text-left text-sm">
+                        <thead className="bg-[var(--table-header-bg)] uppercase tracking-wider text-xs font-medium text-muted-foreground">
                             <tr>
-                                <th className="px-6 py-4">Name</th>
-                                <th className="px-6 py-4">Type</th>
-                                <th className="px-6 py-4">Status</th>
-                                <th className="px-6 py-4">Assignee</th>
-                                <th className="px-6 py-4 text-right">Actions</th>
+                                <th className="px-6 py-4 cursor-pointer" onClick={() => handleSort('name')}>
+                                    <span className="flex items-center gap-1.5">Name <SortIcon field="name" /></span>
+                                </th>
+                                <th className="px-6 py-4 cursor-pointer" onClick={() => handleSort('type')}>
+                                    <span className="flex items-center gap-1.5">Type <SortIcon field="type" /></span>
+                                </th>
+                                <th className="px-6 py-4 cursor-pointer" onClick={() => handleSort('building')}>
+                                    <span className="flex items-center gap-1.5">Building <SortIcon field="building" /></span>
+                                </th>
+                                <th className="px-6 py-4">Floor</th>
+                                <th className="px-6 py-4 cursor-pointer" onClick={() => handleSort('status')}>
+                                    <span className="flex items-center gap-1.5">Status <SortIcon field="status" /></span>
+                                </th>
+                                <th className="px-6 py-4">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-border">
                             {filteredResources.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="px-6 py-12 text-center text-zinc-500">
+                                    <td colSpan={6} className="px-6 py-12 text-center text-muted-foreground">
                                         <div className="flex flex-col items-center justify-center gap-2">
-                                            <Search className="h-8 w-8 text-zinc-600" />
-                                            <p className="text-base font-medium text-white">No resources found</p>
-                                            <p className="text-sm">Try adjusting your search or filters</p>
+                                            <Search className="h-8 w-8 text-muted-foreground/50" />
+                                            <p className="text-base font-medium text-foreground">No resources found</p>
+                                            <p className="text-sm">Try adjusting your search</p>
                                         </div>
                                     </td>
                                 </tr>
                             ) : (
-                                filteredResources.map((resource: any) => (
-                                    <tr key={resource.id} className="group hover:bg-white/5 transition-colors">
-                                        <td className="px-6 py-4">
-                                            <div className="font-medium text-white text-base">{resource.name}</div>
-                                            {(resource.building || resource.floorNumber) && (
-                                                <div className="text-xs text-zinc-500 mt-1 flex items-center gap-1.5">
-                                                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-zinc-700"></span>
-                                                    {resource.building?.name} {resource.floorNumber ? `• Floor ${resource.floorNumber}` : ''}
-                                                </div>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            <span className="inline-flex items-center rounded-lg bg-zinc-800/50 px-2.5 py-1 text-xs font-medium text-zinc-300 ring-1 ring-white/10">
-                                                {resource.type.name}
-                                            </span>
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {currentUser?.role === 'admin' ? (
-                                                <div className="relative inline-block">
+                                filteredResources.map(resource => {
+                                    const displayStatus = resource.computedStatus || resource.status || 'Available'
+                                    return (
+                                        <tr key={resource.id} className="group hover:bg-[var(--hover)] transition-colors">
+                                            <td className="px-6 py-4 font-medium text-foreground">{resource.name}</td>
+                                            <td className="px-6 py-4 text-muted-foreground">{resource.type?.name}</td>
+                                            <td className="px-6 py-4 text-muted-foreground">{resource.building?.name}</td>
+                                            <td className="px-6 py-4 text-muted-foreground">{resource.floorNumber ?? '-'}</td>
+                                            <td className="px-6 py-4">
+                                                {isAdmin ? (
                                                     <select
-                                                        value={resource.status}
-                                                        onChange={async (e) => {
-                                                            const newStatus = e.target.value;
-                                                            // Optimistic update
-                                                            const updatedResources = resources.map((r: any) =>
-                                                                r.id === resource.id ? { ...r, status: newStatus, computedStatus: newStatus } : r
-                                                            );
-                                                            setResources(updatedResources);
-
-                                                            const { updateResourceStatus } = await import('@/app/actions/updateResourceStatus');
-                                                            const result = await updateResourceStatus(resource.id, newStatus);
-
-                                                            if (!result.success) {
-                                                                // Revert on failure
-                                                                alert('Failed to update status');
-                                                            }
+                                                        value={displayStatus}
+                                                        onChange={(e) => handleStatusChange(resource.id, e.target.value)}
+                                                        disabled={updatingStatusId === resource.id}
+                                                        className={`rounded-full px-3 py-1.5 text-xs font-medium border cursor-pointer transition-all focus:outline-none focus:ring-2 disabled:opacity-60 disabled:cursor-wait ${getStatusColor(displayStatus)} ${getDropdownBorderColor(displayStatus)} bg-transparent appearance-none pr-7`}
+                                                        style={{
+                                                            backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E")`,
+                                                            backgroundPosition: 'right 0.25rem center',
+                                                            backgroundRepeat: 'no-repeat',
+                                                            backgroundSize: '1.25em 1.25em'
                                                         }}
-                                                        className={`appearance-none rounded-full pl-3 pr-8 py-1 text-xs font-medium border-0 cursor-pointer transition-all focus:ring-2 focus:ring-offset-2 focus:ring-offset-zinc-900 outline-none ${resource.status === "Available"
-                                                                ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20 hover:bg-emerald-500/20 focus:ring-emerald-500/50"
-                                                                : resource.status === "Allocated"
-                                                                    ? "bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20 hover:bg-blue-500/20 focus:ring-blue-500/50"
-                                                                    : "bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20 hover:bg-amber-500/20 focus:ring-amber-500/50"
-                                                            }`}
-                                                        style={{ backgroundImage: 'none' }}
                                                     >
-                                                        <option value="Available" className="bg-zinc-900 text-zinc-300">Available</option>
-                                                        <option value="Maintenance" className="bg-zinc-900 text-zinc-300">Maintenance</option>
+                                                        {RESOURCE_STATUSES.map(s => (
+                                                            <option key={s} value={s}>{s}</option>
+                                                        ))}
                                                     </select>
-                                                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2">
-                                                        <svg className={`h-3 w-3 ${resource.status === "Available" ? "text-emerald-500" :
-                                                                resource.status === "Allocated" ? "text-blue-500" : "text-amber-500"
-                                                            }`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                            ) : (
-                                                <span
-                                                    className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium border-0 ${resource.computedStatus === "Available"
-                                                            ? "bg-emerald-500/10 text-emerald-400 ring-1 ring-emerald-500/20"
-                                                            : resource.computedStatus === "Allocated"
-                                                                ? "bg-blue-500/10 text-blue-400 ring-1 ring-blue-500/20"
-                                                                : "bg-amber-500/10 text-amber-400 ring-1 ring-amber-500/20"
-                                                        }`}
-                                                >
-                                                    <span className={`h-1.5 w-1.5 rounded-full ${resource.computedStatus === "Available" ? "bg-emerald-400" :
-                                                            resource.computedStatus === "Allocated" ? "bg-blue-400" : "bg-amber-400"
-                                                        } shadow-[0_0_8px_currentColor]`} />
-                                                    {resource.computedStatus}
-                                                </span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4">
-                                            {resource.computedAssignee !== '-' ? (
-                                                <div className="flex items-center gap-2 text-white font-medium">
-                                                    <div className="h-6 w-6 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 flex items-center justify-center text-[10px] text-white shadow-md">
-                                                        {resource.computedAssignee[0]}
-                                                    </div>
-                                                    {resource.computedAssignee}
-                                                </div>
-                                            ) : (
-                                                <span className="text-zinc-600">-</span>
-                                            )}
-                                        </td>
-                                        <td className="px-6 py-4 text-right">
-                                            <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                <button
-                                                    onClick={() => handleViewDetails(resource.id)}
-                                                    className="p-2 text-zinc-400 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                                                    title="View Details"
-                                                >
-                                                    <Eye className="h-4 w-4" />
-                                                </button>
-                                                {currentUser?.role === 'admin' && (
-                                                    <>
-                                                        <button
-                                                            onClick={() => handleEdit(resource)}
-                                                            className="p-2 text-zinc-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
-                                                            title="Edit"
-                                                        >
-                                                            <Pencil className="h-4 w-4" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDelete(resource.id)}
-                                                            className="p-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
-                                                            title="Delete"
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </button>
-                                                    </>
+                                                ) : (
+                                                    <span className={`inline-flex items-center rounded-full px-2.5 py-1 text-xs font-medium ${getStatusColor(displayStatus)}`}>
+                                                        {displayStatus}
+                                                    </span>
                                                 )}
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))
+                                            </td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center gap-1">
+                                                    <button onClick={() => setViewResource(resource)} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-[#1d9bf0] transition-colors" title="View details">
+                                                        <Eye className="h-4 w-4" />
+                                                    </button>
+                                                    {isAdmin && (
+                                                        <>
+                                                            <button onClick={() => { setEditResource(resource); setShowForm(true) }} className="p-2 rounded-lg hover:bg-secondary text-muted-foreground hover:text-amber-500 transition-colors" title="Edit">
+                                                                <Pencil className="h-4 w-4" />
+                                                            </button>
+                                                            <button onClick={() => handleDelete(resource.id)} className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors" title="Delete">
+                                                                <Trash2 className="h-4 w-4" />
+                                                            </button>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )
+                                })
                             )}
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            {isFormOpen && (
+            {showForm && (
                 <ResourceForm
-                    resource={editingResource}
+                    resource={editResource}
                     types={types}
                     buildings={buildings}
                     users={users}
-                    onClose={() => setIsFormOpen(false)}
+                    onClose={() => { setShowForm(false); setEditResource(null); window.location.reload() }}
                 />
             )}
 
-            {viewingResource && (
+            {viewResource && (
                 <ResourceDetailsModal
-                    resource={viewingResource}
-                    onClose={() => setViewingResource(null)}
+                    resource={viewResource}
+                    onClose={() => setViewResource(null)}
                 />
             )}
         </div>

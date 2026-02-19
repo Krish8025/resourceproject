@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-type Theme = 'light'
+type Theme = 'light' | 'dark'
 
 type ThemeContextType = {
     theme: Theme
@@ -12,19 +12,34 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    // Hardcode theme to light
-    const theme: Theme = 'light'
+    const [theme, setTheme] = useState<Theme>('light')
+    const [mounted, setMounted] = useState(false)
 
     useEffect(() => {
-        // Ensure dark mode class is removed
-        document.documentElement.classList.remove('dark')
-        // Clean up any local storage setting
-        localStorage.removeItem('theme')
+        setMounted(true)
+        // Check localStorage first, then system preference
+        const stored = localStorage.getItem('theme') as Theme | null
+        if (stored === 'light' || stored === 'dark') {
+            setTheme(stored)
+            document.documentElement.classList.toggle('dark', stored === 'dark')
+        } else if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            setTheme('dark')
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
     }, [])
 
     const toggleTheme = () => {
-        // No-op for now as we are enforcing light mode
-        console.log('Theme toggle is currently disabled to enforce white theme')
+        const next = theme === 'light' ? 'dark' : 'light'
+        setTheme(next)
+        localStorage.setItem('theme', next)
+        document.documentElement.classList.toggle('dark', next === 'dark')
+    }
+
+    // Prevent flash of wrong theme
+    if (!mounted) {
+        return <>{children}</>
     }
 
     return (

@@ -5,7 +5,7 @@ import { redirect } from 'next/navigation'
 
 export default async function UsersPage() {
     const session = await auth()
-    
+
     // Check if user is admin
     if (!session?.user || session.user.role !== 'admin') {
         redirect('/dashboard')
@@ -24,5 +24,5 @@ export default async function UsersPage() {
         )
     }
 
-    return <UsersClient users={result.users || []} currentUserId={session.user.id} />
+    return <UsersClient users={result.users || []} currentUserId={Number(session.user.id)} />
 }

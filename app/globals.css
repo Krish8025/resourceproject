@@ -1,25 +1,69 @@
 @import "tailwindcss";
 
+/* ===== TWITTER / X INSPIRED THEME ===== */
+
+/* Light Mode (default) */
 :root {
-  --background: #09090b;
-  --foreground: #fafafa;
-  --card: #18181b;
-  --card-foreground: #fafafa;
-  --popover: #18181b;
-  --popover-foreground: #fafafa;
-  --primary: #6366f1;
-  --primary-foreground: #fafafa;
-  --secondary: #27272a;
-  --secondary-foreground: #fafafa;
-  --muted: #27272a;
-  --muted-foreground: #a1a1aa;
-  --accent: #27272a;
-  --accent-foreground: #fafafa;
-  --destructive: #7f1d1d;
-  --destructive-foreground: #fafafa;
-  --border: #27272a;
-  --input: #27272a;
-  --ring: #6366f1;
+  --background: #ffffff;
+  --foreground: #0f1419;
+  --card: #f7f9f9;
+  --card-foreground: #0f1419;
+  --popover: #ffffff;
+  --popover-foreground: #0f1419;
+  --primary: #1d9bf0;
+  --primary-foreground: #ffffff;
+  --secondary: #eff3f4;
+  --secondary-foreground: #0f1419;
+  --muted: #eff3f4;
+  --muted-foreground: #536471;
+  --accent: #e7f5fe;
+  --accent-foreground: #1d9bf0;
+  --destructive: #f4212e;
+  --destructive-foreground: #ffffff;
+  --border: #eff3f4;
+  --input: #eff3f4;
+  --ring: #1d9bf0;
+  --sidebar-bg: #f7f9f9;
+  --sidebar-border: #eff3f4;
+  --sidebar-active: #e7f5fe;
+  --sidebar-hover: #f0f0f0;
+  --hover: #f7f9f9;
+  --input-bg: #eff3f4;
+  --modal-bg: #ffffff;
+  --table-header-bg: #f7f9f9;
+  --badge-bg: #eff3f4;
+}
+
+/* Dark Mode */
+.dark {
+  --background: #15202b;
+  --foreground: #e7e9ea;
+  --card: #1e2732;
+  --card-foreground: #e7e9ea;
+  --popover: #1e2732;
+  --popover-foreground: #e7e9ea;
+  --primary: #1d9bf0;
+  --primary-foreground: #ffffff;
+  --secondary: #273340;
+  --secondary-foreground: #e7e9ea;
+  --muted: #273340;
+  --muted-foreground: #8b98a5;
+  --accent: #1a3a50;
+  --accent-foreground: #1d9bf0;
+  --destructive: #f4212e;
+  --destructive-foreground: #ffffff;
+  --border: #38444d;
+  --input: #273340;
+  --ring: #1d9bf0;
+  --sidebar-bg: #1e2732;
+  --sidebar-border: #38444d;
+  --sidebar-active: #1a3a50;
+  --sidebar-hover: #273340;
+  --hover: #1e2732;
+  --input-bg: #273340;
+  --modal-bg: #1e2732;
+  --table-header-bg: #1e2732;
+  --badge-bg: #273340;
 }
 
 @theme inline {
@@ -51,22 +95,32 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
   min-height: 100vh;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-/* Glassmorphism Utilities */
+/* Glassmorphism Utilities — theme-aware */
 .glass {
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--card);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border);
 }
 
 .glass-card {
-  background: rgba(24, 24, 27, 0.6);
+  background: var(--card);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border);
 }
 
-.dark .glass-card {
-  background: rgba(0, 0, 0, 0.6);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+/* Custom scrollbar for dark/light */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--muted-foreground);
+  border-radius: 3px;
 }

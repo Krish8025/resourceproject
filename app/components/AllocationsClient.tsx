@@ -1,17 +1,45 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Check, X, Clock, Calendar } from 'lucide-react'
+import { Search, Plus, Calendar, User2, Box } from 'lucide-react'
 import { updateBookingStatus } from '../actions/bookings'
 import BookingForm from './BookingForm'
 
-export default function AllocationsClient({ bookings, resources, users, currentUser }: { bookings: any[], resources: any[], users: any[], currentUser?: any }) {
-    const [isFormOpen, setIsFormOpen] = useState(false)
+export default function AllocationsClient({ bookings: initialBookings, resources, users, currentUser }: { bookings: any[], resources: any[], users: any[], currentUser?: any }) {
+    const [bookings, setBookings] = useState(initialBookings)
+    const [searchQuery, setSearchQuery] = useState('')
+    const [statusFilter, setStatusFilter] = useState('All')
+    const [showBookingForm, setShowBookingForm] = useState(false)
 
-    const handleStatusUpdate = async (id: number, status: string) => {
-        if (!currentUser?.id) return;
-        if (confirm(`Are you sure you want to ${status.toLowerCase()} this request?`)) {
-            await updateBookingStatus(id, status, Number(currentUser.id))
+    const isAdmin = currentUser?.role === 'admin'
+
+    const filteredBookings = bookings.filter(booking => {
+        const matchesSearch =
+            booking.resource?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            booking.user?.name?.toLowerCase().includes(searchQuery.toLowerCase())
+
+        const matchesStatus = statusFilter === 'All' || booking.status === statusFilter
+
+        return matchesSearch && matchesStatus
+    })
+
+    const handleStatusUpdate = async (id: number, newStatus: string) => {
+        if (confirm(`Change status to ${newStatus}?`)) {
+            const result = await updateBookingStatus(id, newStatus)
+            if (result.success) {
+                setBookings(bookings.map(b =>
+                    b.id === id ? { ...b, status: newStatus } : b
+                ))
+            }
+        }
+    }
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'Approved': return 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 ring-1 ring-emerald-500/20'
+            case 'Pending': return 'bg-amber-500/10 text-amber-600 dark:text-amber-400 ring-1 ring-amber-500/20'
+            case 'Rejected': return 'bg-red-500/10 text-red-600 dark:text-red-400 ring-1 ring-red-500/20'
+            default: return 'bg-[var(--badge-bg)] text-muted-foreground ring-1 ring-border'
         }
     }
 
@@ -19,111 +47,111 @@ export default function AllocationsClient({ bookings, resources, users, currentU
         <div className="space-y-8">
             <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-white">Allocations</h1>
-                    <p className="mt-2 text-zinc-400">Track and manage resource assignments.</p>
+                    <h1 className="text-3xl font-bold tracking-tight text-foreground">Allocations</h1>
+                    <p className="mt-2 text-muted-foreground">Manage resource bookings and reservations.</p>
                 </div>
                 <button
-                    onClick={() => setIsFormOpen(true)}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all hover:scale-105 hover:shadow-blue-500/30"
+                    onClick={() => setShowBookingForm(true)}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1d9bf0] px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-[#1d9bf0]/20 transition-all hover:scale-105 hover:shadow-[#1d9bf0]/30 hover:bg-[#1a8cd8]"
                 >
                     <Plus className="h-4 w-4" />
                     New Allocation
                 </button>
             </div>
 
-            <div className="grid gap-4">
-                {bookings.length === 0 ? (
-                    <div className="glass-card flex flex-col items-center justify-center rounded-2xl p-12 text-center">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-zinc-800/50 ring-1 ring-white/10 mb-4">
-                            <Calendar className="h-8 w-8 text-zinc-500" />
-                        </div>
-                        <h3 className="text-lg font-semibold text-white">No allocations found</h3>
-                        <p className="mt-2 text-sm text-zinc-400 max-w-sm mx-auto">
-                            There are no active or past allocations to display. Get started by creating a new one.
-                        </p>
-                    </div>
-                ) : (
-                    bookings.map((booking) => (
-                        <div key={booking.id} className="group flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 p-6 rounded-2xl border border-white/5 bg-white/5 backdrop-blur-sm transition-all hover:bg-white/10 hover:border-white/10 hover:shadow-lg">
-                            <div className="flex items-center gap-5">
-                                <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border shadow-inner ${booking.status === 'Approved' ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400' :
-                                        booking.status === 'Pending' ? 'border-amber-500/20 bg-amber-500/10 text-amber-400' :
-                                            'border-red-500/20 bg-red-500/10 text-red-400'
-                                    }`}>
-                                    {booking.status === 'Approved' ? <Check className="h-6 w-6" /> :
-                                        booking.status === 'Pending' ? <Clock className="h-6 w-6" /> :
-                                            <X className="h-6 w-6" />}
-                                </div>
-                                <div>
-                                    <div className="flex items-center gap-2 mb-1">
-                                        <h3 className="font-semibold text-lg text-white">{booking.resource.name}</h3>
-                                        <span className="text-zinc-600">/</span>
-                                        <div className="flex items-center gap-2">
-                                            <div className="h-5 w-5 rounded-full bg-indigo-500/20 flex items-center justify-center text-[10px] text-indigo-300 ring-1 ring-indigo-500/30">
-                                                {booking.user.name[0]}
-                                            </div>
-                                            <span className="text-sm font-medium text-zinc-300">{booking.user.name}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-3 text-xs text-zinc-400">
-                                        <div className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-1 rounded-md ring-1 ring-white/5">
-                                            <Calendar className="h-3.5 w-3.5" />
-                                            <span className="tabular-nums">
-                                                {new Date(booking.startDateTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                        </div>
-                                        <span className="text-zinc-600">&rarr;</span>
-                                        <div className="flex items-center gap-1.5 bg-zinc-800/50 px-2 py-1 rounded-md ring-1 ring-white/5">
-                                            <Calendar className="h-3.5 w-3.5" />
-                                            <span className="tabular-nums">
-                                                {new Date(booking.endDateTime).toLocaleDateString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex items-center gap-3 pl-16 sm:pl-0">
-                                {booking.status === 'Pending' && currentUser?.role === 'admin' ? (
-                                    <div className="flex items-center gap-3">
-                                        <button
-                                            onClick={() => handleStatusUpdate(booking.id, 'Approved')}
-                                            className="px-4 py-2 text-xs font-semibold text-white bg-emerald-600/20 border border-emerald-600/30 rounded-lg hover:bg-emerald-600 hover:border-emerald-600 hover:shadow-lg hover:shadow-emerald-600/20 transition-all duration-300"
-                                        >
-                                            Approve
-                                        </button>
-                                        <button
-                                            onClick={() => handleStatusUpdate(booking.id, 'Rejected')}
-                                            className="px-4 py-2 text-xs font-semibold text-zinc-400 bg-zinc-800/50 border border-zinc-700/50 rounded-lg hover:bg-zinc-800 hover:text-white transition-all duration-300"
-                                        >
-                                            Reject
-                                        </button>
-                                    </div>
-                                ) : (
-                                    <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium border shadow-sm ${booking.status === 'Approved' ? 'border-emerald-500/20 bg-emerald-500/10 text-emerald-400' :
-                                            booking.status === 'Pending' ? 'border-amber-500/20 bg-amber-500/10 text-amber-400' :
-                                                'border-red-500/20 bg-red-500/10 text-red-400'
-                                        }`}>
-                                        <span className={`h-1.5 w-1.5 rounded-full ${booking.status === 'Approved' ? 'bg-emerald-400' :
-                                                booking.status === 'Pending' ? 'bg-amber-400' : 'bg-red-400'
-                                            } shadow-[0_0_8px_currentColor]`} />
-                                        {booking.status}
-                                    </span>
-                                )}
-                            </div>
-                        </div>
-                    ))
-                )}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center">
+                <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+                    <input
+                        type="text"
+                        placeholder="Search bookings..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full rounded-xl border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-[#1d9bf0] focus:outline-none focus:ring-1 focus:ring-[#1d9bf0]"
+                    />
+                </div>
+                <div className="flex gap-2 overflow-x-auto pb-2 sm:pb-0">
+                    {['All', 'Pending', 'Approved', 'Rejected'].map((status) => (
+                        <button
+                            key={status}
+                            onClick={() => setStatusFilter(status)}
+                            className={`rounded-lg px-3 py-2 text-sm font-medium whitespace-nowrap transition-colors ${statusFilter === status
+                                ? 'bg-[#1d9bf0] text-white'
+                                : 'bg-card text-muted-foreground hover:bg-secondary border border-border'
+                                }`}
+                        >
+                            {status}
+                        </button>
+                    ))}
+                </div>
             </div>
 
-            {isFormOpen && (
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                {filteredBookings.map((booking) => (
+                    <div key={booking.id} className="glass-card group rounded-2xl p-5 transition-all hover:shadow-lg hover:shadow-primary/5">
+                        <div className="flex items-start justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1d9bf0]/10 text-[#1d9bf0]">
+                                    <Box className="h-5 w-5" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-foreground">{booking.resource?.name}</h3>
+                                    <p className="text-sm text-muted-foreground">{booking.resource?.type?.name}</p>
+                                </div>
+                            </div>
+                            <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(booking.status)}`}>
+                                <div className={`h-1.5 w-1.5 rounded-full ${booking.status === 'Approved' ? 'bg-emerald-500' :
+                                    booking.status === 'Pending' ? 'bg-amber-500' : 'bg-red-500'
+                                    }`} />
+                                {booking.status}
+                            </span>
+                        </div>
+
+                        <div className="space-y-2 text-sm">
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <User2 className="h-4 w-4" />
+                                <span>{booking.user?.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-muted-foreground">
+                                <Calendar className="h-4 w-4" />
+                                <span>{new Date(booking.startDateTime).toLocaleDateString()} — {new Date(booking.endDateTime).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+
+                        {isAdmin && booking.status === 'Pending' && (
+                            <div className="mt-4 flex items-center gap-2 border-t border-border pt-4">
+                                <button
+                                    onClick={() => handleStatusUpdate(booking.id, 'Approved')}
+                                    className="flex-1 rounded-lg bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 transition-colors"
+                                >
+                                    Approve
+                                </button>
+                                <button
+                                    onClick={() => handleStatusUpdate(booking.id, 'Rejected')}
+                                    className="flex-1 rounded-lg bg-red-500/10 px-3 py-2 text-sm font-medium text-red-600 dark:text-red-400 hover:bg-red-500/20 transition-colors"
+                                >
+                                    Reject
+                                </button>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            {filteredBookings.length === 0 && (
+                <div className="text-center py-12">
+                    <p className="text-muted-foreground">No bookings found matching your criteria.</p>
+                </div>
+            )}
+
+            {showBookingForm && (
                 <BookingForm
                     resources={resources}
                     users={users}
                     currentUser={currentUser}
-                    onClose={() => setIsFormOpen(false)}
+                    onClose={() => { setShowBookingForm(false); window.location.reload() }}
                 />
             )}
         </div>
-    );
+    )
 }

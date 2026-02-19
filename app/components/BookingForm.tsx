@@ -50,29 +50,29 @@ export default function BookingForm({ resources, users, currentUser, onClose }: 
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-            <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl dark:bg-zinc-900 ring-1 ring-zinc-200 dark:ring-zinc-800">
+            <div className="w-full max-w-md rounded-2xl bg-[var(--modal-bg)] p-6 shadow-xl ring-1 ring-border">
                 <div className="flex items-center justify-between mb-6">
-                    <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50">New Allocation</h2>
-                    <button onClick={onClose} className="text-zinc-500 hover:text-zinc-700 dark:hover:text-zinc-300">
+                    <h2 className="text-xl font-semibold text-foreground">New Allocation</h2>
+                    <button onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
                         <X className="h-5 w-5" />
                     </button>
                 </div>
 
                 {error && (
-                    <div className="mb-4 rounded-lg bg-red-50 p-3 text-sm text-red-600 dark:bg-red-900/30 dark:text-red-400">
+                    <div className="mb-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-600 dark:text-red-400">
                         {error}
                     </div>
                 )}
 
                 <form action={handleSubmit} className="space-y-4">
                     <div>
-                        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Resource</label>
+                        <label className="block text-sm font-medium text-foreground">Resource</label>
                         <select
                             name="resourceId"
                             required
                             value={selectedResourceId}
                             onChange={(e) => setSelectedResourceId(e.target.value)}
-                            className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50 [&>option]:text-black"
+                            className="mt-1 block w-full rounded-lg border border-border bg-[var(--input-bg)] px-3 py-2 text-sm text-foreground focus:border-[#1d9bf0] focus:ring-0 [&>option]:text-foreground [&>option]:bg-card"
                         >
                             <option value="">Select a resource</option>
                             {resources.map((r) => (
@@ -84,12 +84,12 @@ export default function BookingForm({ resources, users, currentUser, onClose }: 
                     </div>
 
                     {selectedResource && (selectedResource.facilities?.length > 0 || selectedResource.cupboards?.length > 0) && (
-                        <div className="rounded-lg bg-zinc-50 p-3 text-sm dark:bg-zinc-800/50">
-                            <h4 className="font-medium text-zinc-900 dark:text-zinc-50 mb-2">Includes:</h4>
-                            <div className="space-y-1 text-zinc-600 dark:text-zinc-400">
+                        <div className="rounded-lg bg-secondary p-3 text-sm">
+                            <h4 className="font-medium text-foreground mb-2">Includes:</h4>
+                            <div className="space-y-1 text-muted-foreground">
                                 {selectedResource.facilities?.map((f: any, i: number) => (
                                     <div key={i} className="flex items-center gap-2">
-                                        <div className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                                        <div className="h-1.5 w-1.5 rounded-full bg-[#1d9bf0]" />
                                         <span>{f.name} {f.details && <span className="text-xs opacity-75">({f.details})</span>}</span>
                                     </div>
                                 ))}
@@ -99,19 +99,18 @@ export default function BookingForm({ resources, users, currentUser, onClose }: 
 
                     {/* Selected Resource Details */}
                     {(() => {
-                        // Removing my previous placeholder comment block
                         return null;
                     })()}
 
                     {currentUser?.role === 'admin' ? (
                         <div>
-                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">User</label>
+                            <label className="block text-sm font-medium text-foreground">User</label>
                             <select
                                 name="userId"
                                 required
                                 value={selectedUserId}
                                 onChange={(e) => setSelectedUserId(e.target.value)}
-                                className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50 [&>option]:text-black"
+                                className="mt-1 block w-full rounded-lg border border-border bg-[var(--input-bg)] px-3 py-2 text-sm text-foreground focus:border-[#1d9bf0] focus:ring-0 [&>option]:text-foreground [&>option]:bg-card"
                             >
                                 <option value="">Select a user</option>
                                 {users.map((u) => (
@@ -123,8 +122,8 @@ export default function BookingForm({ resources, users, currentUser, onClose }: 
                         </div>
                     ) : (
                         <div>
-                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">User</label>
-                            <div className="mt-1 block w-full rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-500 dark:border-zinc-800 dark:bg-zinc-800/50 dark:text-zinc-400">
+                            <label className="block text-sm font-medium text-foreground">User</label>
+                            <div className="mt-1 block w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-muted-foreground">
                                 {currentUser?.name}
                             </div>
                             <input type="hidden" name="userId" value={currentUser?.id || ''} />
@@ -133,42 +132,42 @@ export default function BookingForm({ resources, users, currentUser, onClose }: 
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Start Date</label>
+                            <label className="block text-sm font-medium text-foreground">Start Date</label>
                             <input
                                 type="date"
                                 name="startDate"
                                 required
-                                className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                                className="mt-1 block w-full rounded-lg border border-border bg-[var(--input-bg)] px-3 py-2 text-sm text-foreground focus:border-[#1d9bf0] focus:ring-0"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">Start Time</label>
+                            <label className="block text-sm font-medium text-foreground">Start Time</label>
                             <input
                                 type="time"
                                 name="startTime"
                                 required
-                                className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                                className="mt-1 block w-full rounded-lg border border-border bg-[var(--input-bg)] px-3 py-2 text-sm text-foreground focus:border-[#1d9bf0] focus:ring-0"
                             />
                         </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">End Date</label>
+                            <label className="block text-sm font-medium text-foreground">End Date</label>
                             <input
                                 type="date"
                                 name="endDate"
                                 required
-                                className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                                className="mt-1 block w-full rounded-lg border border-border bg-[var(--input-bg)] px-3 py-2 text-sm text-foreground focus:border-[#1d9bf0] focus:ring-0"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">End Time</label>
+                            <label className="block text-sm font-medium text-foreground">End Time</label>
                             <input
                                 type="time"
                                 name="endTime"
                                 required
-                                className="mt-1 block w-full rounded-lg border border-zinc-200 bg-transparent px-3 py-2 text-sm text-zinc-900 focus:border-blue-500 focus:ring-0 dark:border-zinc-800 dark:text-zinc-50"
+                                className="mt-1 block w-full rounded-lg border border-border bg-[var(--input-bg)] px-3 py-2 text-sm text-foreground focus:border-[#1d9bf0] focus:ring-0"
                             />
                         </div>
                     </div>
@@ -177,14 +176,14 @@ export default function BookingForm({ resources, users, currentUser, onClose }: 
                         <button
                             type="button"
                             onClick={onClose}
-                            className="rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                            className="rounded-lg px-4 py-2 text-sm font-medium text-muted-foreground hover:bg-secondary transition-colors"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 disabled:opacity-50"
+                            className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#1d9bf0] px-4 py-2 text-sm font-semibold text-white hover:bg-[#1a8cd8] disabled:opacity-50"
                         >
                             {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                             Create Allocation

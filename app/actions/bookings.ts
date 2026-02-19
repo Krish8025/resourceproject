@@ -46,13 +46,13 @@ export async function createBooking(data: any) {
     }
 }
 
-export async function updateBookingStatus(id: number, status: string, approverId: number) {
+export async function updateBookingStatus(id: number, status: string, approverId?: number) {
     try {
         const booking = await prisma.booking.update({
             where: { id },
             data: {
                 status,
-                approverId
+                ...(approverId !== undefined && { approverId })
             }
         })
         revalidatePath('/allocations')

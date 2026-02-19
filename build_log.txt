@@ -1,0 +1,168 @@
+﻿Γû▓ Next.js 16.1.1 (Turbopack)
+- Environments: .env
+
+node.exe : ΓÜá The 
+"middleware" file 
+convention is 
+deprecated. Please 
+use "proxy" instead. 
+Learn more: https://n
+extjs.org/docs/messag
+es/middleware-to-prox
+y
+At line:1 char:1
++ & "C:\Program Files
+\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo 
+...
++ ~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~
+    + CategoryInfo   
+           : NotSpe  
+  cified: (ΓÜá The   
+  "middle...lewar    
+e-to-proxy:Strin    
+g) [], RemoteExc    
+eption
+    + FullyQualified 
+   ErrorId : Native  
+  CommandError
+ 
+  Creating an optimized production build ...
+Γ£ô Compiled successfully in 4.5s
+  Running TypeScript ...
+Failed to compile.
+
+.next/dev/types/valid
+ator.ts:144:31
+Type error: Type 
+'typeof 
+import("E:/Sem 6/AWT/
+resourceproject/app/a
+pi/auth/[...nextauth]
+/route")' does not 
+satisfy the 
+constraint 'RouteHand
+lerConfig<"/api/auth/
+[...nextauth]">'.
+  Types of property 
+'GET' are 
+incompatible.
+    Type '((args_0: 
+NextApiRequest, 
+args_1: 
+NextApiResponse) => 
+Promise<Session | 
+null>) & (() => 
+Promise<Session | 
+null>) & ((args_0: Ge
+tServerSidePropsConte
+xt) => Promise<...>) 
+& ((args_0: (req: 
+NextAuthRequest, 
+ctx: AppRouteHandlerF
+nContext) => void | 
+... 1 more ... | 
+Promise<...>) => 
+AppRouteHandlerFn) & 
+((args_0: 
+NextAut...' is not 
+assignable to type 
+'((request: 
+NextRequest, 
+context: { params: 
+Promise<{ nextauth: 
+string[]; }>; }) => 
+void | Response | 
+Promise<void | 
+Response>) | 
+undefined'.
+      Type 
+'((args_0: 
+NextApiRequest, 
+args_1: 
+NextApiResponse) => 
+Promise<Session | 
+null>) & (() => 
+Promise<Session | 
+null>) & ((args_0: Ge
+tServerSidePropsConte
+xt) => Promise<...>) 
+& ((args_0: (req: 
+NextAuthRequest, 
+ctx: AppRouteHandlerF
+nContext) => void | 
+... 1 more ... | 
+Promise<...>) => 
+AppRouteHandlerFn) & 
+((args_0: 
+NextAut...' is not 
+assignable to type 
+'(request: 
+NextRequest, 
+context: { params: 
+Promise<{ nextauth: 
+string[]; }>; }) => 
+void | Response | 
+Promise<void | 
+Response>'.
+        Types of 
+parameters 'args_0' 
+and 'request' are 
+incompatible.
+          Type 
+'NextRequest' is 
+missing the 
+following properties 
+from type 
+'NextApiRequest': 
+query, env, aborted, 
+httpVersion, and 67 
+more.
+
+[0m [90m 142 
+|[39m   type __IsExp
+ected[33m<[39m[33m
+Specific[39m 
+[36mextends[39m [3
+3mRouteHandlerConfig
+[39m[33m<[39m[32m"
+/api/auth/[...nextaut
+h]"[39m[33m>>[39m 
+[33m=[39m 
+[33mSpecific[39m
+ [90m 143 |[39m   
+[36mconst[39m 
+handler [33m=[39m 
+{} [36mas[39m 
+[36mtypeof[39m [36
+mimport[39m([32m"..
+/../../app/api/auth/[
+...nextauth]/route.js
+"[39m)
+[31m[1m>[22m[39m
+[90m 144 |[39m   
+type __Check 
+[33m=[39m __IsExpec
+ted[33m<[39m[36mty
+peof[39m 
+handler[33m>[39m
+ [90m     |[39m    
+                     
+      
+[31m[1m^[22m[39m
+ [90m 145 |[39m   
+[90m// 
+@ts-ignore[39m
+ [90m 146 |[39m   
+type __Unused 
+[33m=[39m __Check
+ [90m 147 |[39m 
+}[0m
+Next.js build worker 
+exited with code: 1 
+and signal: null
+
