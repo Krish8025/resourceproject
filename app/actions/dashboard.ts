@@ -52,12 +52,12 @@ export async function getDashboardStats() {
         }))
 
         const bookingStatusData = bookingsByStatus.map(b => ({
-            name: b.status,
+            name: b.status ?? 'Unknown',
             value: b._count.id
         }))
 
         const maintenanceStatusData = maintenanceByStatus.map(m => ({
-            name: m.status,
+            name: m.status ?? 'Unknown',
             value: m._count.id
         }))
 
