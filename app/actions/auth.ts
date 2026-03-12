@@ -19,7 +19,7 @@ const registerSchema = z.object({
 })
 
 export async function authenticate(
-    prevState: string | undefined,
+    prevState: string | null | undefined,
     formData: FormData,
 ) {
     try {
@@ -30,15 +30,15 @@ export async function authenticate(
 
         // Validate input
         const validatedFields = loginSchema.safeParse({ email, password })
-        
+
         if (!validatedFields.success) {
             console.log('Validation failed:', validatedFields.error.errors)
             return validatedFields.error.errors[0].message
         }
 
         // Attempt sign in with NextAuth
-        await signIn('credentials', { 
-            email, 
+        await signIn('credentials', {
+            email,
             password,
             redirectTo: '/dashboard'
         })
@@ -46,7 +46,7 @@ export async function authenticate(
         return null
     } catch (error) {
         console.error('Authentication error:', error)
-        
+
         if (error instanceof AuthError) {
             console.log('AuthError type:', error.type)
             switch (error.type) {
@@ -62,7 +62,7 @@ export async function authenticate(
 }
 
 export async function register(
-    prevState: string | undefined,
+    prevState: string | null | undefined,
     formData: FormData,
 ) {
     try {
@@ -73,7 +73,7 @@ export async function register(
 
         // Validate input
         const validatedFields = registerSchema.safeParse({ name, email, password, role })
-        
+
         if (!validatedFields.success) {
             return validatedFields.error.errors[0].message
         }
@@ -103,11 +103,11 @@ export async function register(
         return 'success'
     } catch (error) {
         console.error('Registration error:', error)
-        
+
         if (error instanceof AuthError) {
             return 'Account created but login failed. Please login manually.'
         }
-        
+
         // Re-throw to allow NextAuth to handle redirects
         throw error
     }
