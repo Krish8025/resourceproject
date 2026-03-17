@@ -24,5 +24,5 @@ export default async function UsersPage() {
         )
     }
 
-    return <UsersClient users={result.users || []} currentUserId={Number(session.user.id)} />
+    return <UsersClient users={result.users || []} currentUserId={parseInt(session?.user?.id as string) || 0} />
 }

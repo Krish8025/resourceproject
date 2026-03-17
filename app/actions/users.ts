@@ -59,7 +59,7 @@ export async function createUser(formData: FormData) {
         const validatedFields = userSchema.safeParse({ name, email, role, password })
 
         if (!validatedFields.success) {
-            return { success: false, error: validatedFields.error.errors[0].message }
+            return { success: false, error: validatedFields.error.issues[0].message }
         }
 
         // Check if user already exists
@@ -108,7 +108,7 @@ export async function updateUser(userId: number, formData: FormData) {
         })
 
         if (!validatedFields.success) {
-            return { success: false, error: validatedFields.error.errors[0].message }
+            return { success: false, error: validatedFields.error.issues[0].message }
         }
 
         // Check if email is taken by another user
@@ -155,7 +155,7 @@ export async function deleteUser(userId: number) {
         const session = await requireAdmin()
 
         // Prevent deleting self
-        if (session.user.id === userId) {
+        if (Number(session.user.id) === userId) {
             return { success: false, error: 'Cannot delete your own account' }
         }
 
@@ -180,7 +180,7 @@ export async function updateUserRole(userId: number, newRole: string) {
         }
 
         // Prevent changing own role
-        if (session.user.id === userId) {
+        if (Number(session.user.id) === userId) {
             return { success: false, error: 'Cannot change your own role' }
         }
 

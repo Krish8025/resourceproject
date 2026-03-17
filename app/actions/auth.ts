@@ -32,8 +32,8 @@ export async function authenticate(
         const validatedFields = loginSchema.safeParse({ email, password })
 
         if (!validatedFields.success) {
-            console.log('Validation failed:', validatedFields.error.errors)
-            return validatedFields.error.errors[0].message
+            console.log('Validation failed:', validatedFields.error.issues)
+            return validatedFields.error.issues[0].message
         }
 
         // Attempt sign in with NextAuth
@@ -75,7 +75,7 @@ export async function register(
         const validatedFields = registerSchema.safeParse({ name, email, password, role })
 
         if (!validatedFields.success) {
-            return validatedFields.error.errors[0].message
+            return validatedFields.error.issues[0].message
         }
 
         // Check if user already exists

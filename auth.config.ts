@@ -19,7 +19,6 @@ export const authConfig = {
         signIn: '/login',
     },
     callbacks: {
-        // @ts-expect-error - types are correct but NextAuth beta types are tricky
         authorized({ auth, request: { nextUrl } }) {
             try {
                 const isLoggedIn = !!auth?.user;
